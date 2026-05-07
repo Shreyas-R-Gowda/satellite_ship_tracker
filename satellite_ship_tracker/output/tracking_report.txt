@@ -1,0 +1,32 @@
+==================================================
+  Satellite Ship Tracking Report
+==================================================
+
+Input folder          : data
+Frames                : 25
+Detector              : classical
+FPS                   : 8
+Frame align           : True
+Total ships tracked   : 3
+
+Ship #1
+  Frames active : 1 → 24 (24 detections)
+  Avg speed     : 4.03 px/frame
+  Start position: (673.5, 788.0)
+  End position  : (664.0, 718.0)
+  Heading       : -97.1°
+
+Ship #2
+  Frames active : 3 → 24 (22 detections)
+  Avg speed     : 3.50 px/frame
+  Start position: (444.0, 791.0)
+  End position  : (446.5, 737.0)
+  Heading       : -88.0°
+
+Ship #3
+  Frames active : 9 → 24 (16 detections)
+  Avg speed     : 1.80 px/frame
+  Start position: (777.0, 573.5)
+  End position  : (735.5, 590.0)
+  Heading       : 146.3°
+
