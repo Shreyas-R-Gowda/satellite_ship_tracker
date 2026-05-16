@@ -97,3 +97,119 @@ Video / Map / Report Outputs
 7. `save_trajectory_map()` and `compute_metrics()` summarize movement and accuracy.
 
 ## Outputs
+
+Running the demo produces:
+
+- `output/demo_raw.mp4`: simulated video generated from input frames
+- `output/demo_annotated.mp4`: tracked video with IDs, trails, and velocity overlays
+- `output/demo_comparison.mp4`: side-by-side raw vs tracked comparison
+- `output/trajectory_map.png`: top-down ship path visualization
+- `output/tracking_report.txt`: per-ship summary with speed and heading
+- `output/frames/`: per-frame annotated PNG exports
+
+## Setup
+
+### 1. Create a virtual environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Run the synthetic demo
+
+```bash
+python3 demo.py
+```
+
+This generates the demo sequence, runs tracking, computes evaluation metrics, and exports videos and maps to `output/`.
+
+### Run tracking on an image folder
+
+```bash
+python3 main.py --input data/ --output output/ --fps 8 --detector classical --save-frames
+```
+
+### Run with tiling support
+
+```bash
+python3 main.py --input path/to/frames --output output/ --tile
+```
+
+### Launch the Streamlit app
+
+```bash
+streamlit run app.py
+```
+
+If you are using the local virtual environment directly:
+
+```bash
+.venv/bin/streamlit run app.py
+```
+
+## Example Demo Metrics
+
+Typical synthetic demo output:
+
+- Precision: `1.000`
+- Recall: `0.827`
+- F1 Score: `0.905`
+- Avg center error: `5.9 px`
+- Unique ship tracks: `3`
+
+## Screenshots / Visualization
+
+Good files to include in a presentation or GitHub preview:
+
+- `output/demo_comparison.mp4`
+- `output/demo_annotated.mp4`
+- `output/trajectory_map.png`
+- `output/tracking_report.txt`
+
+Suggested presentation flow:
+
+1. Show one raw input frame from `data/`
+2. Show `demo_raw.mp4`
+3. Show `demo_annotated.mp4`
+4. Show `demo_comparison.mp4`
+5. Show `trajectory_map.png`
+6. Show `tracking_report.txt`
+
+## Limitations
+
+- The default detector is classical CV and works best when ships are bright and elongated against darker water.
+- The demo is synthetic; real satellite data may require stronger detectors and cleaner metadata.
+- Speed in knots is only physically meaningful when timestamps and GSD are realistic.
+- The current pipeline tracks motion in image space, not latitude/longitude space.
+
+## Future Scope
+
+- Train a YOLO-based detector on real satellite ship datasets
+- Add anomaly detection for unusual vessel motion
+- Add route forecasting and motion prediction models
+- Export structured outputs like CSV or GeoJSON
+- Add georeferencing support for latitude/longitude trajectories
+- Incorporate cloud/noise robustness for real scenes
+- Extend to port congestion analysis and maritime activity monitoring
+
+## Tech Stack
+
+- Python
+- OpenCV
+- NumPy
+- SciPy
+- Matplotlib
+- Streamlit
+
+## License
+
+Add a license here if you plan to make the repository public for reuse.
