@@ -1,10 +1,19 @@
 # Satellite Ship Tracker
 
-Detects and tracks ships in optical satellite image sequences by converting ordered frames into a simulated video, estimating motion across time, and generating visual and numerical tracking outputs.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![OpenCV](https://img.shields.io/badge/OpenCV-Computer%20Vision-green.svg)](https://opencv.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-Frontend-red.svg)](https://streamlit.io/)
+
+Detects and tracks ships in optical satellite image sequences by converting ordered frames into a simulated video, estimating vessel motion across time, and exporting annotated videos, trajectory maps, and tracking reports.
 
 ## Repository Description
 
-Satellite ship tracking system built with computer vision and multi-object tracking. The project preprocesses optical satellite image frames, detects ship-like objects, tracks them across time using Kalman prediction and Hungarian assignment, and exports annotated videos, trajectory maps, and tracking reports.
+Satellite ship tracking system built with computer vision and multi-object tracking. The project preprocesses optical satellite image frames, detects ship-like objects, tracks them across time using Kalman prediction and Hungarian assignment, and summarizes results through visual outputs and evaluation metrics.
+
+## Preview
+
+![Trajectory Map](./output/trajectory_map.png)
 
 ## Problem Statement
 
@@ -18,7 +27,7 @@ This repository currently uses synthetic optical satellite-style imagery generat
 - `data/busy_port/`: denser synthetic scenario with more ships
 - `data/open_ocean/`: sparse synthetic scenario with fewer ships
 
-The CLI and Streamlit app also support running on user-provided real image frames in:
+The CLI and Streamlit app also support user-provided real image frames in:
 
 - `.png`
 - `.jpg`
@@ -26,7 +35,7 @@ The CLI and Streamlit app also support running on user-provided real image frame
 - `.tif`
 - `.tiff`
 
-Important:
+Important notes:
 
 - Input frames should be ordered by time.
 - Real-world speed estimation requires correct timestamps and ground sample distance metadata.
@@ -38,15 +47,8 @@ Important:
 - Optical image preprocessing with resizing, CLAHE, and optional frame alignment
 - Classical ship detection using thresholding, morphology, and contour filtering
 - Optional YOLO detector hook
-- Multi-object tracking with:
-  - persistent ship IDs
-  - Kalman filter motion prediction
-  - Hungarian assignment for global matching
-- Evaluation metrics on synthetic data:
-  - precision
-  - recall
-  - F1 score
-  - average center error
+- Multi-object tracking with persistent IDs, Kalman prediction, and Hungarian assignment
+- Evaluation metrics on synthetic data: precision, recall, F1 score, and average center error
 - Side-by-side comparison video export
 - Large-image tiling support for frames above `1024x1024`
 - Streamlit frontend for demo runs and uploaded image sequences
@@ -111,9 +113,18 @@ Running the demo produces:
 
 ### 1. Create a virtual environment
 
+macOS / Linux:
+
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
+
+Windows:
+
+```powershell
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
 ### 2. Install dependencies
@@ -166,23 +177,14 @@ Typical synthetic demo output:
 - Avg center error: `5.9 px`
 - Unique ship tracks: `3`
 
-## Screenshots / Visualization
+## Visualization Outputs
 
-Good files to include in a presentation or GitHub preview:
+Useful assets for a demo or report:
 
 - `output/demo_comparison.mp4`
 - `output/demo_annotated.mp4`
 - `output/trajectory_map.png`
 - `output/tracking_report.txt`
-
-Suggested presentation flow:
-
-1. Show one raw input frame from `data/`
-2. Show `demo_raw.mp4`
-3. Show `demo_annotated.mp4`
-4. Show `demo_comparison.mp4`
-5. Show `trajectory_map.png`
-6. Show `tracking_report.txt`
 
 ## Limitations
 
@@ -210,6 +212,10 @@ Suggested presentation flow:
 - Matplotlib
 - Streamlit
 
+## Author
+
+Shreyas R Gowda
+
 ## License
 
-Add a license here if you plan to make the repository public for reuse.
+This project is licensed under the MIT License. See [LICENSE](./LICENSE) for details.
