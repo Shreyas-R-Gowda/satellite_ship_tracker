@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 from src.preprocessor  import load_images, preprocess_frames
 from src.ship_detector import ShipDetector
-from src.tracker       import MultiObjectTracker
+from src.tracker       import MultiObjectTracker, CONFIG as TRACKER_CONFIG
 from src.video_builder import write_video, export_frame_pngs
 from src.visualizer    import annotate_frame, save_trajectory_map
 
@@ -28,8 +28,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--input",       default="data/",      help="Folder containing satellite images")
     p.add_argument("--output",      default="output/",    help="Folder for all output files")
     p.add_argument("--fps",         type=int, default=8,  help="Output video frames per second")
-    p.add_argument("--detector",    choices=["classical", "yolo"], default="classical",
-                   help="Detection backend (classical CV or YOLOv8)")
+    p.add_argument("--detector",    choices=["classical", "drone", "yolo"], default="classical",
+                   help="Detection backend (classical CV, drone-tuned CV, or YOLOv8)")
     p.add_argument("--no-align",    action="store_true",  help="Skip ORB frame alignment")
     p.add_argument("--save-frames", action="store_true",  help="Export per-frame annotated PNGs")
     p.add_argument("--trail",       type=int, default=20, help="Trail length (frames) for visualisation")
@@ -81,7 +81,11 @@ def main() -> None:
 
     # ── Preprocess ────────────────────────────────────────────────────────
     print("Preprocessing frames …")
-    processed = preprocess_frames(images, align=not args.no_align)
+    use_align = not args.no_align
+    if args.detector == "drone" and use_align:
+        print("  Drone detector selected — disabling frame alignment for stable footage.")
+        use_align = False
+    processed = preprocess_frames(images, align=use_align)
 
     # ── Detect ────────────────────────────────────────────────────────────
     print(f"Detecting ships using '{args.detector}' detector …")
@@ -103,7 +107,11 @@ def main() -> None:
 
     # ── Track ─────────────────────────────────────────────────────────────
     print("Tracking ships across frames …")
-    mot           = MultiObjectTracker()
+    tracker_config = dict(TRACKER_CONFIG)
+    if args.detector == "drone":
+        tracker_config["iou_threshold"] = 0.10
+        tracker_config["max_lost_frames"] = 8
+    mot           = MultiObjectTracker(config=tracker_config)
     frame_active  = []
     for fid, dets in enumerate(all_detections):
         active = mot.update(dets, fid)
@@ -137,7 +145,7 @@ def main() -> None:
             "Frames":        len(images),
             "Detector":      args.detector,
             "FPS":           args.fps,
-            "Frame align":   not args.no_align,
+            "Frame align":   use_align,
         },
     )
 

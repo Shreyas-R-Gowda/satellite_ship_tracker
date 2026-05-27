@@ -6,6 +6,8 @@ trajectory, velocity estimate, and heading angle.  Tracks survive up to
 MAX_LOST_FRAMES consecutive missed detections before being retired.
 """
 
+from dataclasses import dataclass
+
 import numpy as np
 from typing import Any, Dict, List, Optional, Tuple
 import cv2
@@ -16,7 +18,7 @@ Detection = Dict[str, Any]  # {"bbox": [x, y, w, h], "confidence": float, "class
 CONFIG = {
     "iou_threshold":    0.25,   # minimum IoU to associate a detection with a track
     "max_lost_frames":  5,      # frames a track survives without a matching detection
-    "min_track_length": 2,      # minimum detections to include a track in reports
+    "min_track_length": 5,      # minimum detections to include a track in reports
     "velocity_window":  5,      # number of recent positions used for velocity estimate
     "trail_length":     20,     # max positions stored for rendering the trail
 }
@@ -30,6 +32,28 @@ _TRACK_COLORS = [
     (200, 130,  50), ( 50, 200, 130), (130,  50, 200),
     (220, 180,  60), ( 60, 220, 180), (180,  60, 220),
 ]
+
+
+@dataclass
+class TrackSnapshot:
+    """Immutable per-frame view used for stable annotation rendering."""
+
+    id: int
+    color: Tuple[int, int, int]
+    last_bbox: List[int]
+    last_center: Tuple[float, float]
+    _trail: List[Tuple[float, float]]
+    _velocity: Tuple[float, float]
+    _speed: float
+
+    def trail(self, length: int = CONFIG["trail_length"]) -> List[Tuple[float, float]]:
+        return self._trail[-length:]
+
+    def velocity(self, window: int = CONFIG["velocity_window"]) -> Tuple[float, float]:
+        return self._velocity
+
+    def speed(self) -> float:
+        return self._speed
 
 
 def compute_iou(box_a: List[int], box_b: List[int]) -> float:
@@ -195,6 +219,18 @@ class Track:
         """Return the most recent `length` center positions for trail rendering."""
         return self.centers[-length:]
 
+    def snapshot(self) -> TrackSnapshot:
+        """Freeze the current track state for frame-accurate annotation."""
+        return TrackSnapshot(
+            id=self.id,
+            color=self.color,
+            last_bbox=list(self.last_bbox),
+            last_center=tuple(self.last_center),
+            _trail=list(self.centers),
+            _velocity=self.velocity(),
+            _speed=self.speed(),
+        )
+
 
 class MultiObjectTracker:
     """IoU-based greedy multi-object tracker.
@@ -266,7 +302,7 @@ class MultiObjectTracker:
                 alive.append(track)
         self.tracks = alive
 
-        return [t for t in self.tracks if t.lost_frames == 0]
+        return [t.snapshot() for t in self.tracks if t.lost_frames == 0]
 
     def all_tracks(self) -> List[Track]:
         """Return every track (active + finished) that meets the minimum length."""
